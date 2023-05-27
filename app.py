@@ -1,14 +1,17 @@
-import requests
 import json
+import time
 
+import requests
 import pandas as pd
-from taipy.gui import Gui
+from taipy.gui import Gui, notify
 
-API_KEY = "ADD YOUR API KEY HERE"
+API_KEY = "ADD YOUR OPENAI API KEY HERE"
+INITIAL_PROMPT = "I am a helpful assistant."
+
 API_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 
 
-def generate_chat_completion(messages, model="gpt-4", temperature=1, max_tokens=None):
+def generate_completion(messages, model="gpt-4", temperature=1):
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}",
@@ -20,51 +23,58 @@ def generate_chat_completion(messages, model="gpt-4", temperature=1, max_tokens=
         "temperature": temperature,
     }
 
-    if max_tokens is not None:
-        data["max_tokens"] = max_tokens
-
     response = requests.post(API_ENDPOINT, headers=headers, data=json.dumps(data))
 
     if response.status_code == 200:
         return response.json()["choices"][0]["message"]["content"]
     else:
-        raise Exception(f"Error {response.status_code}: {response.text}")
+        return "I'm sorry, GPT-4 is not available right now."
 
 
-messages = [
-    {"role": "system", "content": "I am a helpful assistant."},
+saved_messages = [
+    {"role": "system", "content": INITIAL_PROMPT},
 ]
 
-
-def generate_chat_response(message, max_tokens=None):
-    response = generate_chat_completion(messages, model="gpt-4", max_tokens=max_tokens)
-    return response
+user_message = ""
 
 
-def messages_to_text(messages):
-    return pd.DataFrame(messages)
-
-
-message = ""
+def messages_to_data(messages):
+    result = []
+    for message in messages:
+        result_message = {}
+        result_message["Role"] = message["role"]
+        result_message["Message"] = message["content"]
+        if result_message["Role"] == "system":
+            result_message["Role"] = "GPT-4"
+        else:
+            result_message["Role"] = "You"
+        result.append(result_message)
+    return pd.DataFrame(result)
 
 
 def on_send_click(state):
-    message = state.message
-    state.messages.append({"role": "user", "content": message})
-    state.messages = state.messages
-    state.message = ""
-    response = generate_chat_response(message)
-    state.messages.append({"role": "system", "content": response})
-    state.messages = state.messages
+    notify(state, "info", "Generating response...")
+    message = state.user_message
+    state.saved_messages.append({"role": "user", "content": message})
+    state.saved_messages = state.saved_messages
+    state.user_message = ""
+    time.sleep(0.1)
+    response = generate_completion(state.saved_messages)
+    state.saved_messages.append({"role": "system", "content": response})
+    state.saved_messages = state.saved_messages
+    notify(state, "success", "GPT-4 generated a response!")
 
 
-# Create the page
 page = """
-# Chat with GPT-4 App coded in 70 lines of Python
-<|{messages_to_text(messages)}|table|show_all|>
-<|{message}|input|label=Message|on_action=on_send_click|>
+# Chat with **GPT-4**{: .color-primary}
+
+<|{messages_to_data(saved_messages)}|table|show_all|width=100%|>
+
+<br/>
+
+<|{user_message}|input|multiline=True|lines_shown=2|label=Your Message|on_action=on_send_click|class_name=fullwidth|>
+
 <|Send|button|on_action=on_send_click|>
 """
 
-# Create the app
-Gui(page).run(use_reloader=True)
+Gui(page).run()
