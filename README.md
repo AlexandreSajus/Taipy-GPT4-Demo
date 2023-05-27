@@ -1,12 +1,10 @@
-# Taipy GPT 4 Chat Demo
+# Taipy GPT-4 Chat Demo
 
-GPT-4 Chat Web App created in 80 lines of Python using Taipy
+GPT-4 Chat Web App created in **only 80 lines of Python** using [Taipy](https://github.com/Avaiga/taipy)
 
 <p align="center">
   <img src="media/app.png" alt="App" width="80%"/>
 </p>
-
-Created with [Taipy](https://github.com/Avaiga/taipy)
 
 ## Usage
 
