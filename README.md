@@ -6,6 +6,14 @@ GPT-4 Chat Web App created in **only 80 lines of Python** using [Taipy](https://
   <img src="media/app.png" alt="App" width="80%"/>
 </p>
 
+Here's a quick Youtube devlog about the project:
+
+<p align="center">
+  <a href="https://youtu.be/84NssvoUluY" target="_blank">
+    <img src="media/gpt4-thumb.png" alt="Youtube Devlog" width="50%"/>
+  </a>
+</p>
+
 ## Usage
 
 **Important Note:** This app requires an OpenAI API key connected to an account with access to GPT-4
