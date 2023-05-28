@@ -7,6 +7,7 @@ from taipy.gui import Gui, notify
 
 API_KEY = "ADD YOUR OPENAI API KEY HERE"
 INITIAL_PROMPT = "I am a helpful assistant."
+MAX_TOKENS = 150
 
 API_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 
@@ -22,6 +23,8 @@ def generate_completion(messages, model="gpt-4", temperature=1):
         "messages": messages,
         "temperature": temperature,
     }
+
+    data["max_tokens"] = MAX_TOKENS
 
     response = requests.post(API_ENDPOINT, headers=headers, data=json.dumps(data))
 
